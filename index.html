@@ -820,7 +820,7 @@
     });
     
     // iOS-specific fix for audio
-    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
       document.addEventListener('touchstart', function() {
         if (music.paused) {
           try {
