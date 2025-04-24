@@ -395,6 +395,69 @@
       color: #666;
       font-family: Arial, sans-serif;
     }
+
+    /* Adding only media queries for responsiveness without changing original layout */
+    @media (max-width: 640px) {
+      .wrapper {
+        width: 100%;
+        padding: 0 10px;
+        box-sizing: border-box;
+      }
+      
+      .letter {
+        width: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .letter h1 {
+        font-size: 24px;
+      }
+      
+      .letter p {
+        font-size: 16px;
+      }
+      
+      .signature {
+        font-size: 18px;
+      }
+      
+      .links-love {
+        flex-wrap: wrap;
+      }
+    }
+    
+    @media (max-width: 320px) {
+      .envelope-container {
+        transform: scale(0.8) translateX(-100vw);
+      }
+      
+      @keyframes slideIn {
+        to {
+          transform: scale(0.8) translateX(0);
+        }
+      }
+      
+      .envelope-flap {
+        border-left: 150px solid transparent;
+        border-right: 150px solid transparent;
+        border-top: 100px solid #ff9aab;
+      }
+    }
+    
+    /* Fix for iOS Safari viewport issues */
+    @supports (-webkit-touch-callout: none) {
+      .wrapper {
+        position: absolute;
+        top: 0;
+      }
+      
+      body {
+        min-height: -webkit-fill-available;
+      }
+    }
   </style>
 </head>
 <body id="body">
@@ -422,18 +485,18 @@
     <div class="letter">
       <h1>You and I: Chapter One</h1>
       <p>
-        Hi baby, happy 1st anniversary to us. I may not be the perfect one for you, but trust me, I love you the way you deserve to be loved. I hope you know that I’ll do everything just to make you feel that you truly deserve to be loved.
+        Hi baby, happy 1st anniversary to us. I may not be the perfect one for you, but trust me, I love you the way you deserve to be loved. I hope you know that I'll do everything just to make you feel that you truly deserve to be loved.
       </p>
       <p>
         Selama setahun ini, kita udah lewatin banyak hal bareng—mulai dari seneng, sedih, marah-marahan, sampe ketawa-ketiwi gak jelas. Life's been a rollercoaster ride, tapi aku seneng bisa ngalamin semua itu sama kamu. Meskipun kadang kita punya beda pendapat, tapi aku seneng kita selalu bisa nyari solusi bareng.
       </p>
       <p>
-        Makasih udah jadi support system terbaik aku, temen curhat setia, dan pacar yang selalu bisa bikin hati aku meleleh. I can’t wait to continue this journey with you. I love you, always. ❤️
+        Makasih udah jadi support system terbaik aku, temen curhat setia, dan pacar yang selalu bisa bikin hati aku meleleh. I can't wait to continue this journey with you. I love you, always. ❤️
       </p>
       <p class="signature">Yang tak pernah berhenti mencintaimu,<br/>Adam Still Sigma</p>
       
       <div class="links-love">
-        <button onclick="window.location.href=''"> Memory </button>
+        <button onclick="window.location.href='https://drive.google.com/drive/folders/161CSNGmk7Z96M4rjCUExU3GrBobep27E?usp=drive_link'"> Memory </button>
         <div class="heart">
           <img src="https://cdn-icons-png.flaticon.com/512/833/833472.png" alt="Heart">
         </div>
@@ -504,7 +567,28 @@
         shadow.classList.add('animate');
         createHearts();
       }, 2000);
+      
+      // Try to play audio or prompt user to enable it
+      try {
+        music.play().catch(function(error) {
+          console.log("Audio autoplay was prevented. User needs to interact with the document first.");
+          isMusicPlaying = false;
+          musicBtn.textContent = '🔇';
+        });
+      } catch(e) {
+        // For older browsers
+        console.log("Audio playback error:", e);
+      }
     });
+    
+    // Fix for iOS audio
+    document.addEventListener('touchstart', function() {
+      if (music.paused) {
+        music.play().catch(function(error) {
+          console.log("Still couldn't play audio after touch:", error);
+        });
+      }
+    }, {once: true});
     
     // Buat aktifin lagu on/off
     function toggleMusic() {
@@ -535,6 +619,15 @@
           paper.classList.add('open');
           instruction.textContent = ''; //optional message
           resetBtn.classList.add('show');
+          
+          // Try to play music on envelope open
+          if (music.paused) {
+            music.play().catch(function(error) {
+              console.log("Couldn't play audio on envelope open");
+            });
+            musicBtn.textContent = '🔊';
+            isMusicPlaying = true;
+          }
         }, 700);
         
         isOpen = true;
