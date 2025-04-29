@@ -2,826 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>You and I: Chapter One</title>
-  <!-- Preload background image -->
-  <link rel="preload" href="Foto.jpg" as="image">
-  <!-- Preload audio -->
-  <link rel="preload" href="Bunga Abadi.mp3" as="audio">
-  <style>
-    /* Reset and base styles */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #f8e1e5; /* Fallback color before image loads */
-      font-family: 'Georgia', serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      overflow-x: hidden;
-      position: relative;
-    }
-
-    /* Background image with better loading handling */
-    .bg-image {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      background: url('Foto.jpg') no-repeat center center;
-      background-size: cover;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-    
-    .bg-image.loaded {
-      opacity: 1;
-    }
-
-    .envelope-container {
-      position: relative;
-      width: 280px; /* Slightly smaller for mobile */
-      height: 180px;
-      cursor: pointer;
-      perspective: 1000px;
-      margin-bottom: 20px;
-      transform: translateX(-100vw);
-      animation: slideIn 1.5s forwards ease-out; /* Slightly faster animation */
-    }
-
-    @keyframes slideIn {
-      to {
-        transform: translateX(0);
-      }
-    }
-
-    .floating-hearts {
-      position: absolute;
-      width: 300px; /* Reduced for better mobile performance */
-      height: 200px;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden; /* Prevent overflow issues */
-    }
-
-    .envelope {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: #ffb8c4;
-      border: 2px solid #ff9aab;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Lighter shadow for better performance */
-      border-radius: 10px;
-      overflow: hidden;
-      z-index: 2;
-      will-change: transform; /* Optimize animations */
-    }
-
-    .envelope::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, transparent 49.5%, #ff9aab 49.5%, #ff9aab 50.5%, transparent 50.5%),
-                  linear-gradient(45deg, transparent 49.5%, #ff9aab 49.5%, #ff9aab 50.5%, transparent 50.5%);
-      z-index: 1;
-      transition: opacity 0.3s ease;
-    }
-    
-    .envelope.open::before {
-      opacity: 0;
-    }
-
-    .envelope-shadow {
-      position: absolute;
-      bottom: -15px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 230px;
-      height: 25px;
-      background: rgba(0, 0, 0, 0.1);
-      border-radius: 50%;
-      filter: blur(6px); /* Reduced blur for better performance */
-      z-index: 1;
-    }
-
-    .envelope.animate {
-      animation: bounce 1.5s ease-in-out infinite;
-    }
-
-    .envelope-shadow.animate {
-      animation: shadow-bounce 1.5s ease-in-out infinite;
-    }
-
-    /* Heart styling */
-    .envelope-heart {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) rotate(-45deg);
-      width: 35px; /* Slightly smaller for mobile */
-      height: 35px;
-      background: #df3a4a;
-      z-index: 4;
-      transition: all 0.4s ease;
-      will-change: transform, opacity; /* Optimize animations */
-    }
-
-    .envelope-heart::before,
-    .envelope-heart::after {
-      content: '';
-      position: absolute;
-      width: 35px;
-      height: 35px;
-      background: #df3a4a;
-      border-radius: 50%;
-      transition: all 0.4s ease;
-    }
-
-    .envelope-heart::before {
-      top: -17.5px;
-      left: 0;
-    }
-
-    .envelope-heart::after {
-      left: 17.5px;
-      top: 0;
-    }
-    
-    .envelope.open .envelope-heart {
-      background: transparent;
-      transition: background 0.2s ease;
-    }
-    
-    .envelope.open .envelope-heart::before {
-      transform: translate(-30px, -15px);
-      opacity: 0;
-      transition: all 0.5s ease;
-    }
-    
-    .envelope.open .envelope-heart::after {
-      transform: translate(30px, -15px);
-      opacity: 0;
-      transition: all 0.5s ease;
-    }
-
-    /* Floating hearts optimization */
-    .float-heart {
-      position: absolute;
-      background: #df3a4a;
-      opacity: 0.8;
-      transform: rotate(-45deg);
-      will-change: transform, opacity; /* Optimize animations */
-    }
-
-    .float-heart::before,
-    .float-heart::after {
-      content: '';
-      position: absolute;
-      background: #df3a4a;
-      border-radius: 50%;
-    }
-
-    .float-heart::before {
-      top: -50%;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    .float-heart::after {
-      left: 50%;
-      top: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    @keyframes floatUp {
-      0% {
-        transform: translate(0, 0) rotate(-45deg) scale(1);
-        opacity: 0.8;
-      }
-      100% {
-        transform: translate(0, -80px) rotate(-45deg) scale(0.5); /* Reduced travel distance */
-        opacity: 0;
-      }
-    }
-
-    /* Optimized animations for mobile */
-    @keyframes bounce {
-      0%, 100% {
-        transform: translateY(0) rotate(0deg);
-      }
-      50% {
-        transform: translateY(-7px) rotate(0deg); /* Simplified animation */
-      }
-    }
-
-    @keyframes shadow-bounce {
-      0%, 100% {
-        transform: translateX(-50%) scale(1);
-        opacity: 0.2;
-      }
-      50% {
-        transform: translateX(-50%) scale(0.9);
-        opacity: 0.15;
-      }
-    }
-
-    .envelope-flap {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 0;
-      height: 0;
-      border-left: 140px solid transparent; /* Adjusted for smaller envelope */
-      border-right: 140px solid transparent;
-      border-top: 90px solid #ff9aab;
-      z-index: 3;
-      transition: transform 0.6s ease;
-      transform-origin: top;
-      will-change: transform; /* Optimize animations */
-    }
-
-    .envelope.open .envelope-flap {
-      transform: rotateX(180deg);
-    }
-
-    /* Letter container */
-    .wrapper {
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: 500px; /* Maximum width for larger screens */
-      padding: 0 15px; /* Add padding for smaller screens */
-      overflow: hidden;
-      max-height: 0;
-      transition: max-height 1.8s ease-in-out; /* Slightly faster */
-      box-sizing: border-box;
-    }
-
-    .wrapper.open {
-      max-height: 1000px; /* Increased to handle more content */
-    }
-
-    .letter {
-      background: white;
-      padding: 25px; /* Reduced padding for mobile */
-      margin: 20px auto;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      border-radius: 8px;
-      text-align: center;
-      box-sizing: border-box;
-      width: 100%;
-    }
-
-    .letter h1 {
-      margin-top: 0;
-      font-size: 24px; /* Smaller font on mobile */
-      text-align: center;
-      color: #df3a4a;
-    }
-
-    .letter p {
-      line-height: 1.7;
-      font-size: 16px; /* Smaller font on mobile */
-      margin: 18px 0;
-      text-align: center;
-    }
-
-    .signature {
-      margin-top: 18px;
-      font-style: italic;
-      text-align: center;
-      color: #df3a4a;
-      font-size: 18px;
-      margin-bottom: 25px;
-    }
-
-    .links-love {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-      margin: 25px 0 5px 0;
-      border-top: 1px dashed #ffccd5;
-      padding-top: 25px;
-      flex-wrap: wrap; /* Allow wrapping on small screens */
-    }
-
-    .links-love button {
-      background-color: white;
-      border: 2px solid #ffb8c4;
-      border-radius: 10px;
-      padding: 10px 18px;
-      font-size: 15px;
-      cursor: pointer;
-      transition: all 0.3s;
-      color: #df3a4a;
-      touch-action: manipulation; /* Better touch handling */
-    }
-
-    .links-love button:hover {
-      background-color: #ffe4e1;
-      transform: scale(1.03); /* Reduced scale for mobile */
-    }
-
-    .heart img {
-      width: 35px;
-      animation: beat 2s ease-in-out infinite;
-      will-change: transform; /* Optimize animations */
-    }
-
-    @keyframes beat {
-      0%, 100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.15); /* Reduced scale for performance */
-      }
-    }
-
-    .instruction {
-      position: fixed;
-      bottom: 15px;
-      width: 100%;
-      text-align: center;
-      color: #fff;
-      font-size: 15px;
-      font-family: Arial, sans-serif;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-      padding: 0 10px;
-      box-sizing: border-box;
-    }
-
-    /* Modified reset button positioning */
-    .reset-button {
-      background-color: #df3a4a;
-      color: white;
-      border: none;
-      padding: 8px 15px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 14px;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      display: none;
-      z-index: 50;
-      touch-action: manipulation; /* Better touch handling */
-      /* Position in center below the letter */
-      margin: 0 auto 20px auto;
-    }
-
-    .reset-button-container {
-      width: 100%;
-      text-align: center;
-      margin-top: 0;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      display: none;
-    }
-
-    .reset-button-container.show {
-      display: block;
-      opacity: 1;
-    }
-
-    .reset-button.show {
-      display: inline-block;
-      opacity: 1;
-    }
-
-    .reset-button:hover {
-      background-color: #c62c3b;
-    }
-    
-    /* Modified music control to remove text */
-    .music-control {
-      position: fixed;
-      bottom: 15px;
-      right: 15px;
-      display: flex;
-      align-items: center;
-      background: rgba(255, 255, 255, 0.8);
-      padding: 8px;
-      border-radius: 50%;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      z-index: 100;
-      touch-action: manipulation; /* Better touch handling */
-    }
-    
-    .music-control button {
-      background: none;
-      border: none;
-      font-size: 22px;
-      cursor: pointer;
-      color: #df3a4a;
-      width: 30px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      padding: 0;
-      touch-action: manipulation; /* Better touch handling */
-    }
-    
-    .music-control button:hover {
-      transform: scale(1.05);
-    }
-
-    /* Improved media queries */
-    @media (min-width: 641px) {
-      .envelope-container {
-        width: 300px;
-        height: 200px;
-      }
-      
-      .envelope-flap {
-        border-left: 150px solid transparent;
-        border-right: 150px solid transparent;
-        border-top: 100px solid #ff9aab;
-      }
-      
-      .floating-hearts {
-        width: 600px;
-        height: 300px;
-      }
-      
-      .letter h1 {
-        font-size: 28px;
-      }
-      
-      .letter p {
-        font-size: 18px;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .envelope-container {
-        width: 260px;
-        height: 170px;
-      }
-      
-      .envelope-flap {
-        border-left: 130px solid transparent;
-        border-right: 130px solid transparent;
-        border-top: 85px solid #ff9aab;
-      }
-      
-      .letter {
-        padding: 20px 15px;
-      }
-      
-      .letter h1 {
-        font-size: 22px;
-      }
-      
-      .letter p {
-        font-size: 15px;
-        line-height: 1.6;
-      }
-      
-      .signature {
-        font-size: 17px;
-      }
-      
-      .links-love button {
-        padding: 8px 15px;
-        font-size: 14px;
-      }
-      
-      .heart img {
-        width: 30px;
-      }
-    }
-    
-    @media (max-width: 360px) {
-      .envelope-container {
-        width: 240px;
-        height: 160px;
-        transform: scale(0.9) translateX(-100vw);
-      }
-      
-      @keyframes slideIn {
-        to {
-          transform: scale(0.9) translateX(0);
-        }
-      }
-      
-      .envelope-flap {
-        border-left: 120px solid transparent;
-        border-right: 120px solid transparent;
-        border-top: 80px solid #ff9aab;
-      }
-      
-      .envelope-heart {
-        width: 30px;
-        height: 30px;
-      }
-      
-      .envelope-heart::before,
-      .envelope-heart::after {
-        width: 30px;
-        height: 30px;
-      }
-      
-      .envelope-heart::before {
-        top: -15px;
-      }
-      
-      .envelope-heart::after {
-        left: 15px;
-      }
-      
-      .letter h1 {
-        font-size: 20px;
-      }
-      
-      .letter p {
-        font-size: 14px;
-      }
-      
-      .links-love {
-        gap: 10px;
-      }
-    }
-    
-    /* Fix for iOS Safari viewport issues */
-    @supports (-webkit-touch-callout: none) {
-      .wrapper {
-        position: absolute;
-        top: 0;
-      }
-      
-      body {
-        min-height: -webkit-fill-available;
-      }
-      
-      html {
-        height: -webkit-fill-available;
-      }
-    }
-  </style>
-</head>
-<body id="body">
-  <!-- Background image container for better loading -->
-  <div class="bg-image" id="bgImage"></div>
-
-  <!-- Audio element -->
-  <audio id="bgMusic" preload="auto">
-    <source src="Bunga Abadi.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
-  </audio>
-  
-  <!-- Modified music control to show only icon -->
-  <div class="music-control">
-    <button id="musicToggle" aria-label="Toggle music">🔊</button>
-  </div>
-
-  <div class="envelope-container" id="envelopeContainer">
-    <div class="floating-hearts" id="floating-hearts"></div>
-    <div class="envelope" id="envelope">
-      <div class="envelope-heart" id="heart"></div>
-      <div class="envelope-flap"></div>
-    </div>
-    <div class="envelope-shadow" id="envelope-shadow"></div>
-  </div>
-
-  <div class="wrapper" id="paper">
-    <div class="letter">
-      <h1>You and I: Chapter One</h1>
-      <p> Hi baby, happy 1st anniversary to us. I may not be the perfect one for you, but trust me, I love you the way you deserve to be loved. I hope you know that I'll do everything just to make you feel that you truly deserve to be loved. Selama setahun ini, kita udah lewatin banyak hal bareng—mulai dari seneng, sedih, marah-marahan, sampe ketawa-ketiwi gak jelas. Life's been a rollercoaster ride, tapi aku seneng bisa ngalamin semua itu sama kamu. Meskipun kadang kita punya beda pendapat, tapi aku seneng kita selalu bisa nyari solusi bareng. Makasih udah jadi support system terbaik aku, temen curhat setia, dan pacar yang selalu bisa bikin hati aku meleleh. I can't wait to continue this journey with you. I love you, always. ❤️ </p>
-      <p class="signature">Yang tak pernah berhenti mencintaimu,<br/>Adam Still Sigma</p>
-      <div class="links-love">
-        <button onclick="openLink('https://drive.google.com/drive/folders/161CSNGmk7Z96M4rjCUExU3GrBobep27E?usp=drive_link')"> Memory </button>
-        <div class="heart">
-          <img src="https://cdn-icons-png.flaticon.com/512/833/833472.png" alt="Heart">
-        </div>
-        <button onclick="openLink('https://www.instagram.com/adam.fauzan_?igsh=d2E1ZWplZmtxMGE3')"> Story </button>
-      </div>
-    </div>
-    <!-- Added container for reset button below letter -->
-    <div class="reset-button-container" id="resetBtnContainer">
-      <button class="reset-button" id="resetBtn" aria-label="Reset animation">🔄 Masukin Lagi</button>
-    </div>
-  </div>
-
-  <div class="instruction" id="instruction"> Dibuka ya surat nyaa </div>
-
-  <script>
-    // Variables and element references
-    let isOpen = false;
-    let isMusicPlaying = false;
-    let heartInterval;
-    let heartCount = 0;
-    let maxHearts = 10; // Limit total hearts for better performance
-    
-    const music = document.getElementById('bgMusic');
-    const musicBtn = document.getElementById('musicToggle');
-    const heart = document.getElementById('heart');
-    const floatingHeartsContainer = document.getElementById('floating-hearts');
-    const envelope = document.getElementById('envelope');
-    const shadow = document.getElementById('envelope-shadow');
-    const envelopeContainer = document.getElementById('envelopeContainer');
-    const bgImage = document.getElementById('bgImage');
-    const resetBtnContainer = document.getElementById('resetBtnContainer');
-    
-    // Load background image
-    function loadBackgroundImage() {
-      const img = new Image();
-      img.onload = function() {
-        bgImage.classList.add('loaded');
-      };
-      img.src = 'Foto.jpg';
-    }
-    
-    // Call immediately to start loading
-    loadBackgroundImage();
-    
-    // Function to create floating hearts with performance limits
-    function createHearts() {
-      heartInterval = setInterval(() => {
-        if (!isOpen && heartCount < maxHearts) {
-          const heart = document.createElement('div');
-          heart.classList.add('float-heart');
-          heartCount++;
-          
-          // Smaller size for better performance
-          const size = Math.floor(Math.random() * 10) + 15; 
-          heart.style.width = `${size}px`;
-          heart.style.height = `${size}px`;
-          
-          // Position hearts on sides - avoid center for better performance
-          let xPos;
-          if (Math.random() > 0.5) {
-            xPos = Math.random() * -60 - 60; // -120 to -60
-          } else {
-            xPos = Math.random() * 60 + 60; // 60 to 120
-          }
-          
-          const yPos = Math.random() * 100 - 50; // -50 to 50
-          heart.style.left = `calc(50% + ${xPos}px)`;
-          heart.style.top = `calc(50% + ${yPos}px)`;
-          
-          // Fixed and faster duration for better performance
-          const duration = Math.random() * 1 + 1.5;
-          heart.style.animation = `floatUp ${duration}s linear forwards`;
-          
-          floatingHeartsContainer.appendChild(heart);
-          
-          // Remove heart after animation completes
-          setTimeout(() => {
-            if (heart.parentNode === floatingHeartsContainer) {
-              floatingHeartsContainer.removeChild(heart);
-            }
-            heartCount--;
-          }, duration * 1000);
-        }
-      }, 300); // Slower heart creation for better performance
-    }
-    
-    // Function to toggle music with error handling
-    function toggleMusic() {
-      if (isMusicPlaying) {
-        music.pause();
-        musicBtn.textContent = '🔇';
-      } else {
-        try {
-          music.play()
-            .then(() => {
-              musicBtn.textContent = '🔊';
-            })
-            .catch((error) => {
-              console.log("Couldn't play audio:", error);
-              musicBtn.textContent = '🔇';
-            });
-        } catch(e) {
-          console.log("Audio error:", e);
-        }
-      }
-      isMusicPlaying = !isMusicPlaying;
-    }
-    
-    // Function to open links with delay to prevent accidental clicks
-    function openLink(url) {
-      setTimeout(() => {
-        window.location.href = url;
-      }, 100);
-    }
-
-    // Function to open envelope with optimized animations
-    function openEnvelope() {
-      if (!isOpen) {
-        envelope.classList.remove('animate');
-        shadow.classList.remove('animate');
-        envelope.classList.add('open');
-        
-        // Stop the floating hearts
-        clearInterval(heartInterval);
-        
-        // Clear any existing hearts for better performance
-        while (floatingHeartsContainer.firstChild) {
-          floatingHeartsContainer.removeChild(floatingHeartsContainer.firstChild);
-        }
-        heartCount = 0;
-        
-        setTimeout(() => {
-          const paper = document.getElementById('paper');
-          const instruction = document.getElementById('instruction');
-          
-          paper.classList.add('open');
-          instruction.textContent = ''; //optional message
-          resetBtnContainer.classList.add('show');
-          
-          // Try to play music with proper error handling
-          if (music.paused) {
-            try {
-              music.play()
-                .then(() => {
-                  isMusicPlaying = true;
-                  musicBtn.textContent = '🔊';
-                })
-                .catch(() => {});
-            } catch(e) {}
-          }
-        }, 600); // Slightly faster transition
-        
-        isOpen = true;
-      }
-    }
-
-    // Function to reset animation
-    function resetAnimation() {
-      const paper = document.getElementById('paper');
-      const instruction = document.getElementById('instruction');
-      
-      paper.classList.remove('open');
-      
-      setTimeout(() => {
-        envelope.classList.remove('open');
-        
-        setTimeout(() => {
-          envelope.classList.add('animate');
-          shadow.classList.add('animate');
-          resetBtnContainer.classList.remove('show');  
-          instruction.textContent = 'Happy Anniversary ya sayang!';
-          isOpen = false;
-          
-          // Restart floating hearts
-          createHearts();
-        }, 700); // Slightly faster
-      }, 1500); // Slightly faster
-    }
-    
-    // Set up event listeners
-    document.addEventListener('DOMContentLoaded', function() {
-      // Make envelope clickable
-      envelopeContainer.addEventListener('click', openEnvelope);
-      
-      // Set up music toggle
-      musicBtn.addEventListener('click', toggleMusic);
-      
-      // Set up reset button
-      document.getElementById('resetBtn').addEventListener('click', resetAnimation);
-      
-      // Start animations slightly later for better performance
-      setTimeout(() => {
-        envelope.classList.add('animate');
-        shadow.classList.add('animate');
-        
-        // Start creating hearts
-        setTimeout(() => {
-          createHearts();
-        }, 1000);
-      }, 1500);
-      
-      // Attempt to play audio on first interaction
-      document.addEventListener('click', function() {
-        if (music.paused) {
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>You and I: Chapter One</title>
+  <title>Love Letter Envelope</title>
   <style>
     body {
       margin: 0;
@@ -844,6 +26,7 @@
       cursor: pointer;
       perspective: 1000px;
       margin-bottom: 20px;
+      /* Start position off-screen to the left */
       transform: translateX(-100vw);
       animation: slideIn 2s forwards ease-out;
     }
@@ -854,48 +37,31 @@
       }
     }
 
+    /* Modified: Floating hearts container positioned on both sides of the envelope */
     .floating-hearts {
       position: absolute;
-      width: 600px;
+      width: 600px; /* Wider than envelope */
       height: 300px;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       pointer-events: none;
-      z-index: 0;
+      z-index: 0; /* Put floating hearts behind the envelope */
     }
 
     .envelope {
       position: absolute;
       width: 100%;
       height: 100%;
-      background: #ffb8c4; /* Lighter pink color to match the image */
-      border: 2px solid #ff9aab; /* Darker pink border */
+      background: #fff;
+      border: 2px solid #ffb3c6;
       box-shadow: 0 8px 16px rgba(0,0,0,0.1);
       border-radius: 10px;
       overflow: hidden;
-      z-index: 2;
+      z-index: 2; /* Ensure envelope is above floating hearts */
     }
 
-    /* Add envelope lines like in the image */
-    .envelope::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, transparent 49.5%, #ff9aab 49.5%, #ff9aab 50.5%, transparent 50.5%),
-                  linear-gradient(45deg, transparent 49.5%, #ff9aab 49.5%, #ff9aab 50.5%, transparent 50.5%);
-      z-index: 1;
-      transition: opacity 0.3s ease;
-    }
-    
-    /* MODIFIED: Make the X lines disappear when envelope opens */
-    .envelope.open::before {
-      opacity: 0;
-    }
-
+    /* Shadow beneath the envelope */
     .envelope-shadow {
       position: absolute;
       bottom: -20px;
@@ -917,60 +83,62 @@
       animation: shadow-bounce 1.5s ease-in-out infinite;
     }
 
-    /* Center heart positioning - made larger and more prominent */
+    /* Center heart positioning */
     .envelope-heart {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%) rotate(-45deg);
-      width: 40px;
-      height: 40px;
-      background: #df3a4a; /* More vibrant red to match image */
+      width: 30px;
+      height: 30px;
+      background: #ff69b4;
       z-index: 4;
-      transition: all 0.4s ease; /* MODIFIED: Faster transition from 0.8s to 0.4s */
+      transition: all 0.8s ease;
     }
 
     .envelope-heart::before,
     .envelope-heart::after {
       content: '';
       position: absolute;
-      width: 40px;
-      height: 40px;
-      background: #df3a4a; /* Same red color */
+      width: 30px;
+      height: 30px;
+      background: #ff69b4;
       border-radius: 50%;
-      transition: all 0.4s ease; /* MODIFIED: Faster transition from 0.8s to 0.4s */
+      transition: all 0.8s ease;
     }
 
     .envelope-heart::before {
-      top: -20px;
+      top: -15px;
       left: 0;
     }
 
     .envelope-heart::after {
-      left: 20px;
+      left: 15px;
       top: 0;
     }
     
+    /* Heart breaking animation */
     .envelope.open .envelope-heart {
       background: transparent;
-      transition: background 0.2s ease; /* MODIFIED: Faster transition from 0.3s to 0.2s */
+      transition: background 0.3s ease;
     }
     
     .envelope.open .envelope-heart::before {
       transform: translate(-30px, -15px);
-      opacity: 0;  /* MODIFIED: Fully transparent (0) instead of 0.4 */
-      transition: all 0.5s ease; /* MODIFIED: Faster transition from 1s to 0.5s */
+      opacity: 0.4;
+      transition: all 1s ease;
     }
     
     .envelope.open .envelope-heart::after {
       transform: translate(30px, -15px);
-      opacity: 0;  /* MODIFIED: Fully transparent (0) instead of 0.4 */
-      transition: all 0.5s ease; /* MODIFIED: Faster transition from 1s to 0.5s */
+      opacity: 0.4;
+      transition: all 1s ease;
     }
 
+    /* Floating hearts styling */
     .float-heart {
       position: absolute;
-      background: #df3a4a;
+      background: #ff69b4;
       opacity: 0.8;
       transform: rotate(-45deg);
     }
@@ -979,7 +147,7 @@
     .float-heart::after {
       content: '';
       position: absolute;
-      background: #df3a4a;
+      background: #ff69b4;
       border-radius: 50%;
     }
 
@@ -1043,7 +211,7 @@
       height: 0;
       border-left: 150px solid transparent;
       border-right: 150px solid transparent;
-      border-top: 100px solid #ff9aab; /* Darker pink to match border */
+      border-top: 100px solid #ffb3c6;
       z-index: 3;
       transition: transform 0.7s ease;
       transform-origin: top;
@@ -1075,28 +243,27 @@
       margin: 20px auto;
       box-shadow: 0 8px 16px rgba(0,0,0,0.2);
       border-radius: 8px;
-      text-align: center; /* MODIFIED: Changed from justify to center */
+      text-align: justify;
     }
 
     .letter h1 {
       margin-top: 0;
       font-size: 30px;
       text-align: center;
-      color: #df3a4a;
+      color: #ff69b4;
     }
 
     .letter p {
       line-height: 1.8;
       font-size: 18px;
       margin: 20px 0;
-      text-align: center; /* MODIFIED: Added to ensure paragraphs are centered */
     }
 
     .signature {
       margin-top: 20px;
       font-style: italic;
       text-align: center;
-      color: #df3a4a;
+      color: #ff69b4;
       font-size: 20px;
       margin-bottom: 30px;
     }
@@ -1113,13 +280,13 @@
 
     .links-love button {
       background-color: white;
-      border: 2px solid #ffb8c4;
+      border: 2px solid pink;
       border-radius: 10px;
       padding: 12px 20px;
       font-size: 16px;
       cursor: pointer;
       transition: all 0.3s;
-      color: #df3a4a;
+      color: #ff69b4;
     }
 
     .links-love button:hover {
@@ -1156,7 +323,7 @@
       position: fixed;
       top: 20px;
       right: 20px;
-      background-color: #df3a4a;
+      background-color: #ff69b4;
       color: white;
       border: none;
       padding: 10px 20px;
@@ -1174,9 +341,10 @@
     }
 
     .reset-button:hover {
-      background-color: #c62c3b;
+      background-color: #ff4081;
     }
     
+    /* Music Control Styles */
     .music-control {
       position: fixed;
       bottom: 20px;
@@ -1195,7 +363,7 @@
       border: none;
       font-size: 24px;
       cursor: pointer;
-      color: #df3a4a;
+      color: #ff69b4;
       margin-right: 5px;
       width: 30px;
       height: 30px;
@@ -1214,73 +382,10 @@
       color: #666;
       font-family: Arial, sans-serif;
     }
-
-    /* Adding only media queries for responsiveness without changing original layout */
-    @media (max-width: 640px) {
-      .wrapper {
-        width: 100%;
-        padding: 0 10px;
-        box-sizing: border-box;
-      }
-      
-      .letter {
-        width: 100%;
-        padding: 20px;
-        box-sizing: border-box;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .letter h1 {
-        font-size: 24px;
-      }
-      
-      .letter p {
-        font-size: 16px;
-      }
-      
-      .signature {
-        font-size: 18px;
-      }
-      
-      .links-love {
-        flex-wrap: wrap;
-      }
-    }
-    
-    @media (max-width: 320px) {
-      .envelope-container {
-        transform: scale(0.8) translateX(-100vw);
-      }
-      
-      @keyframes slideIn {
-        to {
-          transform: scale(0.8) translateX(0);
-        }
-      }
-      
-      .envelope-flap {
-        border-left: 150px solid transparent;
-        border-right: 150px solid transparent;
-        border-top: 100px solid #ff9aab;
-      }
-    }
-    
-    /* Fix for iOS Safari viewport issues */
-    @supports (-webkit-touch-callout: none) {
-      .wrapper {
-        position: absolute;
-        top: 0;
-      }
-      
-      body {
-        min-height: -webkit-fill-available;
-      }
-    }
   </style>
 </head>
 <body id="body">
-  <!-- Buat nambah lagu  -->
+  <!-- buat masukin lagu  -->
   <audio id="bgMusic" autoplay loop>
     <source src="Bunga Abadi.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
@@ -1302,22 +407,34 @@
 
   <div class="wrapper" id="paper">
     <div class="letter">
-      <h1>You and I: Chapter One</h1>
-      <p> Hi baby, happy 1st anniversary to us. I may not be the perfect one for you, but trust me, I love you the way you deserve to be loved. I hope you know that I'll do everything just to make you feel that you truly deserve to be loved. Selama setahun ini, kita udah lewatin banyak hal bareng—mulai dari seneng, sedih, marah-marahan, sampe ketawa-ketiwi gak jelas. Life's been a rollercoaster ride, tapi aku seneng bisa ngalamin semua itu sama kamu. Meskipun kadang kita punya beda pendapat, tapi aku seneng kita selalu bisa nyari solusi bareng. Makasih udah jadi support system terbaik aku, temen curhat setia, dan pacar yang selalu bisa bikin hati aku meleleh. I can't wait to continue this journey with you. I love you, always. ❤️ </p>
-      <p class="signature">Yang tak pernah berhenti mencintaimu,<br/>Adam Still Sigma</p>
+      <h1>Happy Anniversary!</h1>
+      <p>
+        Cintaku, 
+        
+        Sudah genap satu tahun kita bersama, dan setiap harinya terasa istimewa karenamu. Terima kasih telah menjadi bagian hidupku yang paling berharga.
+      </p>
+      <p>
+        Setiap senyummu membuat hariku cerah, setiap tawamu adalah musik terindah. Kamu adalah alasan kenapa aku percaya cinta sejati itu ada.
+      </p>
+      
+      <p>
+        Di hari spesial ini, aku ingin mengatakan betapa aku mencintaimu lebih dari yang bisa kuungkapkan. Aku berjanji akan selalu berada di sisimu.
+      </p>
+      <p class="signature">Forever yours,<br/>Pasanganmu yang mencintaimu 💖</p>
+      
       <div class="links-love">
-        <button onclick="window.location.href='https://drive.google.com/drive/folders/161CSNGmk7Z96M4rjCUExU3GrBobep27E?usp=drive_link'"> Memory </button>
+        <button onclick="window.location.href='https://link1.com'">🎥 Nonton Bareng</button>
         <div class="heart">
           <img src="https://cdn-icons-png.flaticon.com/512/833/833472.png" alt="Heart">
         </div>
-        <button onclick="window.location.href='https://www.instagram.com/adam.fauzan_?igsh=d2E1ZWplZmtxMGE3'"> Story </button>
+        <button onclick="window.location.href='https://link2.com'">📸 Foto Lucu</button>
       </div>
     </div>
   </div>
 
   <button class="reset-button" id="resetBtn" onclick="resetAnimation()">🔄 Masukin Lagi </button>
 
-  <div class="instruction" id="instruction"> Dibuka ya surat nyaa  </div>
+  <div class="instruction" id="instruction">Buka dong sayang amlop nyaaa </div>
 
   <script>
     let isOpen = false;
@@ -1330,7 +447,7 @@
     const envelope = document.getElementById('envelope');
     const shadow = document.getElementById('envelope-shadow');
     
-    // Function to create floating hearts
+    // Function to create floating hearts - MODIFIED FOR LARGER HEARTS ON THE SIDES
     function createHearts() {
       heartInterval = setInterval(() => {
         if (!isOpen) {
@@ -1343,6 +460,7 @@
           heart.style.height = `${size}px`;
           
           // Random position on the sides of the envelope (not in the center)
+          // Choose either left side (-300 to -150) or right side (150 to 300)
           let xPos;
           if (Math.random() > 0.5) {
             // Left side
@@ -1362,45 +480,27 @@
           
           floatingHeartsContainer.appendChild(heart);
           
-          // Remove heart after animation completes (Animasi )
+          // Remove heart after animation completes
           setTimeout(() => {
             heart.remove();
           }, duration * 1000);
         }
-      }, 200);
+      }, 200); // Create hearts more frequently (reduced from 300ms to 200ms)
     }
     
-    // Start bounce animation only after slide-in is complete (Animasi )
+    // Start bounce animation only after slide-in is complete
     window.addEventListener('load', () => {
       setTimeout(() => {
+        // Only apply bounce animation to the envelope, not the container
         envelope.classList.add('animate');
         shadow.classList.add('animate');
+        
+        // Start creating hearts after slide-in animation finishes
         createHearts();
-      }, 2000);
-      
-      // Try to play audio or prompt user to enable it
-      try {
-        music.play().catch(function(error) {
-          console.log("Audio autoplay was prevented. User needs to interact with the document first.");
-          isMusicPlaying = false;
-          musicBtn.textContent = '🔇';
-        });
-      } catch(e) {
-        // For older browsers
-        console.log("Audio playback error:", e);
-      }
+      }, 2000); // Same timing as the slideIn animation (2s)
     });
     
-    // Fix for iOS audio
-    document.addEventListener('touchstart', function() {
-      if (music.paused) {
-        music.play().catch(function(error) {
-          console.log("Still couldn't play audio after touch:", error);
-        });
-      }
-    }, {once: true});
-    
-    // Buat aktifin lagu on/off
+    // untuk on/off lagu nya
     function toggleMusic() {
       if (isMusicPlaying) {
         music.pause();
@@ -1427,17 +527,8 @@
           const resetBtn = document.getElementById('resetBtn');
           
           paper.classList.add('open');
-          instruction.textContent = ''; //optional message
+          instruction.textContent = ''; //opsional kalau mau nambah ucapan
           resetBtn.classList.add('show');
-          
-          // Try to play music on envelope open
-          if (music.paused) {
-            music.play().catch(function(error) {
-              console.log("Couldn't play audio on envelope open");
-            });
-            musicBtn.textContent = '🔊';
-            isMusicPlaying = true;
-          }
         }, 700);
         
         isOpen = true;
@@ -1454,20 +545,21 @@
       setTimeout(() => {
         envelope.classList.remove('open');
         
+        // sama kayak for loop cuman ada jeda
         setTimeout(() => {
           envelope.classList.add('animate');
           shadow.classList.add('animate');
           resetBtn.classList.remove('show');
-          instruction.textContent = 'Happy Anniversary ya sayang!';
+          instruction.textContent = 'Kok dibuka lagi,suka ya? wkwkwk';
           isOpen = false;
           
-          // Restart floating hearts when reset (Animasi )
+          // Restart floating hearts when reset
           createHearts();
         }, 800);
       }, 2000);
     }
     
-    // Auto-play music on first click
+    // nigga
     document.addEventListener('click', function() {
       if (music.paused) {
         music.play();
@@ -1478,4 +570,3 @@
   </script>
 </body>
 </html>
-
